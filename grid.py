@@ -3,8 +3,13 @@
     Ao clicar nas células é preenchida uma cor
     Se a tecla 'G' for pressionada, a cor é verde
     Se a tecla 'R' for pressionada, a cor é vermelha
+    Se a tecla 'B' for pressionada, a cor é azul
+    Se a tecla 'W' for pressionada, a cor é marrom
 
-    Isso para definir os locais com vegetação e fogo
+    Se a tecla 'X' for pressionada, o valor da célula é zerado
+    e ela volta a ser branca
+
+    Isso para definir os locais com vegetação, fogo, madeira e água
 '''
 
 
@@ -15,15 +20,17 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)
+blue = 	(0, 0, 255)
+brown = (150, 75, 0)
 
 # largura e altura de cada grid
-width = 20
-height = 20
+width = 25
+height = 25
 
 # margem entre cada célula
-margin = 5
+margin = 3
 
-n = 20  # número de linhas e colunas
+n = 15  # número de linhas e colunas
 
 # cria um array 2D: lista de listas e inicia com zeros
 grid = []
@@ -32,14 +39,11 @@ for row in range(n):
     for col in range(n):
         grid[row].append(0)
 
-
-grid[1][5] = 1
-
 # inicializa o pygame
 pygame.init()
 
 # altura e largura da tela
-window_size = [500, 500]
+window_size = [425, 425]
 screen = pygame.display.set_mode(window_size)
 
 # título da tela
@@ -50,6 +54,7 @@ done = False
 
 # cor definida pelo usuário que preencherá célula
 new_color = white
+clicked = 0
 
 # clock que será usado na execução
 clock = pygame.time.Clock()
@@ -66,23 +71,27 @@ while not done:
             # muda as coordenadas x e y para coordenadas grid
             col = pos[0] // (width + margin)
             row = pos[1] // (height + margin)
-            # define aquela localização como 1
-            grid[row][col] = 1
+
+            # define aquela localização como clicked
+            grid[row][col] = clicked
             print("Click ", pos, "Grid coordinates: ", row, col)
         
         if event.type == pygame.KEYDOWN:
 
-            # checa se tecla 'G' foi pressionada
             if event.key == pygame.K_g:
-                new_color = green
+                clicked = 1
             
-            # checa se tecla 'R' foi pressionada
             if event.key == pygame.K_r:
-                new_color = red
+                clicked = 2
             
-            # checa se tecla 'R' foi pressionada
+            if event.key == pygame.K_b:
+                clicked = 3
+
             if event.key == pygame.K_w:
-                new_color = white
+                clicked = 4
+
+            if event.key == pygame.K_x:
+                clicked = 0
 
         # cor de fundo da tela
         screen.fill(black)
@@ -90,15 +99,27 @@ while not done:
     # desenha a grid
     for row in range(n):
         for col in range(n):
+            # preenche de branco inicialmente
             color = white
+
             if grid[row][col] == 1:
-                color = new_color
+                color = green
+            if grid[row][col] == 2:
+                color = red
+            if grid[row][col] == 3:
+                color = blue
+            if grid[row][col] == 4:
+                color = brown
+            if grid[row][col] == 0:
+                color = white
+            
             pygame.draw.rect(screen,
                              color,
                              [(margin+width)*col + margin,
                              (margin+height)*row + margin,
                              width,
                              height])
+            
     
     # limita para 60 frames por segundo
     clock.tick(60)
