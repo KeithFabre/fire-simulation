@@ -20,70 +20,63 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)
-blue = 	(0, 0, 255)
+blue = (0, 0, 255)
 brown = (150, 75, 0)
 
-# largura e altura de cada grid
-width = 25
-height = 25
+width = 25 # largura célula
+height = 25 # altura célula
 
-# margem entre cada célula
-margin = 3
-
+margin = 3 # margem entre cada célula
 n = 15  # número de linhas e colunas
 
-# cria um array 2D: lista de listas e inicia com zeros
-grid = []
+grid = [] # grid inicia com 1s => para área arborizada
 for row in range(n):
     grid.append([])
     for col in range(n):
-        grid[row].append(0)
+        grid[row].append(1)
 
-# inicializa o pygame
 pygame.init()
 
-# altura e largura da tela
 window_size = [425, 425]
 screen = pygame.display.set_mode(window_size)
 
-# título da tela
 pygame.display.set_caption("Grid 2D")
 
-# loop até que user clique o botão para sair
 done = False
 
-# cor definida pelo usuário que preencherá célula
-new_color = white
-clicked = 0
+new_color = green # cor para a célula
+clicked = 1 # valor para célula
 
-# clock que será usado na execução
 clock = pygame.time.Clock()
 
 while not done:
-    for event in pygame.event.get():  # usuario fez algo
-        
-        if event.type == pygame.QUIT:  # se user clicou para sair
+    for event in pygame.event.get():  
+
+        if event.type == pygame.QUIT: 
             done = True
-        
+
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # user clicou com o mouse: pega posição
             pos = pygame.mouse.get_pos()
-            # muda as coordenadas x e y para coordenadas grid
+
             col = pos[0] // (width + margin)
             row = pos[1] // (height + margin)
 
-            # define aquela localização como clicked
             grid[row][col] = clicked
             print("Click ", pos, "Grid coordinates: ", row, col)
         
+        # tentando habilitar clique e arraste pra selecionar células
+        if event.type == (pygame.MOUSEBUTTONUP):
+            posMotion = pygame.mouse.get_pos()
+            print('clicked and moved {}'.format(posMotion))
+
         if event.type == pygame.KEYDOWN:
 
             if event.key == pygame.K_g:
                 clicked = 1
-            
+
             if event.key == pygame.K_r:
                 clicked = 2
-            
+
             if event.key == pygame.K_b:
                 clicked = 3
 
@@ -93,14 +86,14 @@ while not done:
             if event.key == pygame.K_x:
                 clicked = 0
 
-        # cor de fundo da tela
-        screen.fill(black)
+        
+        screen.fill(black) # cor de fundo da tela
 
-    # desenha a grid
-    for row in range(n):
+    
+    for row in range(n): # desenha a grid
         for col in range(n):
-            # preenche de branco inicialmente
-            color = white
+
+            color = green # preenche de branco
 
             if grid[row][col] == 1:
                 color = green
@@ -112,20 +105,17 @@ while not done:
                 color = brown
             if grid[row][col] == 0:
                 color = white
-            
+
             pygame.draw.rect(screen,
                              color,
                              [(margin+width)*col + margin,
-                             (margin+height)*row + margin,
-                             width,
-                             height])
-            
+                              (margin+height)*row + margin,
+                              width,
+                              height])
+
+    clock.tick(60) # 60 frames/s
     
-    # limita para 60 frames por segundo
-    clock.tick(60)
-    # atualiza a tela com o que foi desenhado
-    pygame.display.flip()
+    pygame.display.flip() # atualiza a tela
 
 
 pygame.quit()
-
