@@ -5,19 +5,14 @@
     Se a tecla 'R' for pressionada, a cor é vermelha
     Se a tecla 'B' for pressionada, a cor é azul
     Se a tecla 'W' for pressionada, a cor é marrom
-
     Se a tecla 'X' for pressionada, o valor da célula é zerado
     e ela volta a ser branca
-
     Isso para definir os locais com vegetação, fogo, madeira e água
 '''
 
 
 import pygame
 from Button import button
-
-
-
 
 # cores
 black = (0, 0, 0)
@@ -32,18 +27,8 @@ width = 15 # largura célula
 height = 15 # altura célula
 
 
-
-
-
-
-
-
 margin = 3 # margem entre cada célula
 n = 30  # número de linhas e colunas
-
-
-
-
 
 
 grid = [] # grid inicia com 1s => para área arborizada
@@ -55,18 +40,10 @@ for row in range(n):
 pygame.init()
 
 
-
-
-
-
-
 window_size = [545,690]
 screen = pygame.display.set_mode(window_size, pygame.RESIZABLE)
 
 pygame.display.set_caption("Grid 2D")
-
-
-
 
 
 #load button image
@@ -75,44 +52,39 @@ exit_img = pygame.image.load('./Button/save.png').convert_alpha()
 #create button instance
 exit_button = button.Button((window_size[0]/3 + window_size[0]/20), window_size[1]-window_size[0]/4, exit_img, 0.25)
 
-
-
-
-
 done = False
-
-
 
 new_color = green # cor para a célula
 clicked = 1 # valor para célula
 
-
-
-
 clock = pygame.time.Clock()
 
-
+out = False # clicked outside of grid
 
 while not done:
 
     screen.fill(silver)
-    
-    if exit_button.draw(screen):
-        run = False
 
     for event in pygame.event.get():  
 
         if event.type == pygame.QUIT: 
             done = True
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if (event.type == pygame.MOUSEBUTTONDOWN):
             pos = pygame.mouse.get_pos()
 
             col = pos[0] // (width + margin)
             row = pos[1] // (height + margin)
 
-            grid[row][col] = clicked
-            print("Click ", pos, "Grid coordinates: ", row, col)
+            # handles clicks outside of grid
+            if (pos[0] > (width+margin)*n) or (pos[1] > (height+margin)*n):
+                print('out of grid')
+                out = True
+            if not(out):
+                print(pos[0],pos[1])
+                grid[row][col] = clicked
+                print("Click ", pos, "Grid coordinates: ", row, col)
+
         
         # tentando habilitar clique e arraste pra selecionar células
         if event.type == (pygame.MOUSEBUTTONUP):
@@ -139,11 +111,6 @@ while not done:
             if event.key == pygame.K_x:
                 clicked = 0
             
-
-
-        
-        
-    
     for row in range(n): # desenha a grid
         for col in range(n):
 
@@ -169,11 +136,16 @@ while not done:
                               width,
                               height])
 
+    if exit_button.draw(screen):
+        done = True
+
+
     clock.tick(60) # 60 frames/s
     
-    pygame.display.flip() # atualiza a tela
+    pygame.display.flip() # updates screen
+    out = False # reset so it draws again
 
 
 pygame.quit()
 
-#print(grid)
+print(grid)
