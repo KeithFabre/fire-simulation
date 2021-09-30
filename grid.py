@@ -14,20 +14,37 @@
 
 
 import pygame
+from Button import button
+
+
+
 
 # cores
 black = (0, 0, 0)
+silver =(255, 255, 255) 
 white = (255, 255, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)
 blue = (0, 0, 255)
 brown = (150, 75, 0)
 
-width = 25 # largura célula
-height = 25 # altura célula
+width = 15 # largura célula
+height = 15 # altura célula
+
+
+
+
+
+
+
 
 margin = 3 # margem entre cada célula
-n = 15  # número de linhas e colunas
+n = 30  # número de linhas e colunas
+
+
+
+
+
 
 grid = [] # grid inicia com 1s => para área arborizada
 for row in range(n):
@@ -37,19 +54,52 @@ for row in range(n):
 
 pygame.init()
 
-window_size = [425, 425]
-screen = pygame.display.set_mode(window_size)
+
+
+
+
+
+
+window_size = [545,690]
+screen = pygame.display.set_mode(window_size, pygame.RESIZABLE)
 
 pygame.display.set_caption("Grid 2D")
 
+
+
+
+
+#load button image
+exit_img = pygame.image.load('./Button/save.png').convert_alpha()
+
+#create button instance
+exit_button = button.Button((window_size[0]/3 + window_size[0]/20), window_size[1]-window_size[0]/4, exit_img, 0.25)
+
+
+
+
+
 done = False
+
+
 
 new_color = green # cor para a célula
 clicked = 1 # valor para célula
 
+
+
+
 clock = pygame.time.Clock()
 
+
+
 while not done:
+
+    screen.fill(silver)
+    
+    if exit_button.draw(screen):
+        run = False
+
     for event in pygame.event.get():  
 
         if event.type == pygame.QUIT: 
@@ -83,18 +133,24 @@ while not done:
             if event.key == pygame.K_w:
                 clicked = 4
 
+            if event.key == pygame.K_z:
+                clicked = -1
+
             if event.key == pygame.K_x:
                 clicked = 0
+            
+
 
         
-        screen.fill(black) # cor de fundo da tela
-
+        
     
     for row in range(n): # desenha a grid
         for col in range(n):
 
             color = green # preenche de branco
 
+            if grid[row][col] == -1:
+                color = black
             if grid[row][col] == 1:
                 color = green
             if grid[row][col] == 2:
@@ -119,3 +175,5 @@ while not done:
 
 
 pygame.quit()
+
+#print(grid)
