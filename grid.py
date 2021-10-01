@@ -9,6 +9,13 @@ green = (0, 255, 0)
 red = (255, 0, 0)
 blue = (0, 0, 255)
 brown = (150, 75, 0)
+gold = (212, 175, 55)
+
+# the golden part will be the part we want to avoid burning
+# like protected areas
+# its value will be x, and if fire catches this area the 
+# simulation stops
+
 
 width = 15  # largura célula
 height = 15  # altura célula
@@ -93,6 +100,9 @@ while not done:
 
             if event.key == pygame.K_z:
                 clicked = -1
+            
+            if event.key == pygame.K_k:
+                clicked = 'x'
 
             if event.key == pygame.K_x:
                 clicked = 0
@@ -102,6 +112,7 @@ while not done:
 
             color = green  # preenche de branco
 
+            
             if grid[row][col] == -1:
                 color = black
             if grid[row][col] == 1:
@@ -114,6 +125,8 @@ while not done:
                 color = brown
             if grid[row][col] == 0:
                 color = white
+            if grid[row][col] == 'x':
+                color = gold
 
             pygame.draw.rect(screen,
                              color,
