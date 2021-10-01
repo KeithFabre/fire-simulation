@@ -1,37 +1,23 @@
-'''
-    Inicia com grid em branco
-    Ao clicar nas células é preenchida uma cor
-    Se a tecla 'G' for pressionada, a cor é verde
-    Se a tecla 'R' for pressionada, a cor é vermelha
-    Se a tecla 'B' for pressionada, a cor é azul
-    Se a tecla 'W' for pressionada, a cor é marrom
-    Se a tecla 'X' for pressionada, o valor da célula é zerado
-    e ela volta a ser branca
-    Isso para definir os locais com vegetação, fogo, madeira e água
-'''
-
-
 import pygame
 from Button import button
 
 # cores
 black = (0, 0, 0)
-silver =(255, 255, 255) 
+silver = (255, 255, 255)
 white = (255, 255, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)
 blue = (0, 0, 255)
 brown = (150, 75, 0)
 
-width = 15 # largura célula
-height = 15 # altura célula
+width = 15  # largura célula
+height = 15  # altura célula
+
+margin = 1  # margem entre cada célula
+n = 40  # número de linhas e colunas
 
 
-margin = 3 # margem entre cada célula
-n = 30  # número de linhas e colunas
-
-
-grid = [] # grid inicia com 1s => para área arborizada
+grid = []  # grid inicia com 1s => para área arborizada
 for row in range(n):
     grid.append([])
     for col in range(n):
@@ -39,57 +25,57 @@ for row in range(n):
 
 pygame.init()
 
+min_width = (width+margin)*n
+min_height = (height+margin)*n
 
-window_size = [545,690]
+print(min_width,min_height)
+
+window_size = [min_width+1, min_height+175]
 screen = pygame.display.set_mode(window_size, pygame.RESIZABLE)
 
 pygame.display.set_caption("Grid 2D")
 
 
-#load button image
+# load button image
 exit_img = pygame.image.load('./Button/save.png').convert_alpha()
 
-#create button instance
-exit_button = button.Button((window_size[0]/3 + window_size[0]/20), window_size[1]-window_size[0]/4, exit_img, 0.25)
+# create button instance
+exit_button = button.Button(
+    (window_size[0]/3 + window_size[0]/20), window_size[1]-window_size[0]/4, exit_img, 0.25)
 
 done = False
 
-new_color = green # cor para a célula
-clicked = 1 # valor para célula
+new_color = green  # cor para a célula
+clicked = 1  # valor para célula
 
 clock = pygame.time.Clock()
 
-out = False # clicked outside of grid
+
+def paintCell():
+    click = pygame.mouse.get_pressed()
+    pos = pygame.mouse.get_pos()
+
+    col = pos[0] // (width + margin)
+    row = pos[1] // (height + margin)
+
+    outsideGrid = (pos[0] > (width+margin)*n) or (pos[1] > (height+margin)*n)
+
+    outsideWindow = True if pygame.mouse.get_focused() == 0 else False
+
+    if click[0] == True:
+        if outsideGrid == False and outsideWindow == False:
+            grid[row][col] = clicked
+
 
 while not done:
 
     screen.fill(silver)
 
-    for event in pygame.event.get():  
+    for event in pygame.event.get():
 
-        if event.type == pygame.QUIT: 
+        if event.type == pygame.QUIT:
             done = True
 
-        if (event.type == pygame.MOUSEBUTTONDOWN):
-            pos = pygame.mouse.get_pos()
-
-            col = pos[0] // (width + margin)
-            row = pos[1] // (height + margin)
-
-            # handles clicks outside of grid
-            if (pos[0] > (width+margin)*n) or (pos[1] > (height+margin)*n):
-                print('out of grid')
-                out = True
-            if not(out):
-                print(pos[0],pos[1])
-                grid[row][col] = clicked
-                print("Click ", pos, "Grid coordinates: ", row, col)
-
-        
-        # tentando habilitar clique e arraste pra selecionar células
-        if event.type == (pygame.MOUSEBUTTONUP):
-            posMotion = pygame.mouse.get_pos()
-            print('clicked and moved {}'.format(posMotion))
 
         if event.type == pygame.KEYDOWN:
 
@@ -110,11 +96,11 @@ while not done:
 
             if event.key == pygame.K_x:
                 clicked = 0
-            
-    for row in range(n): # desenha a grid
+
+    for row in range(n):  # desenha a grid
         for col in range(n):
 
-            color = green # preenche de branco
+            color = green  # preenche de branco
 
             if grid[row][col] == -1:
                 color = black
@@ -135,15 +121,14 @@ while not done:
                               (margin+height)*row + margin,
                               width,
                               height])
-
+    #save button
     if exit_button.draw(screen):
         done = True
 
+    clock.tick(60)  # 60 frames/s
 
-    clock.tick(60) # 60 frames/s
-    
-    pygame.display.flip() # updates screen
-    out = False # reset so it draws again
+    paintCell()
+    pygame.display.flip()  # updates screen
 
 
 pygame.quit()
