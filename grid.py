@@ -2,14 +2,15 @@ import pygame
 from Button import button
 
 # cores
-black = (0, 0, 0)
 silver = (255, 255, 255)
-white = (255, 255, 255)
-green = (0, 255, 0)
-red = (255, 0, 0)
-blue = (0, 0, 255)
-brown = (150, 75, 0)
 gold = (212, 175, 55)
+black = (0, 0, 0)
+
+brown = (150, 75, 0)
+blue = (0, 0, 255)
+red = (255, 0, 0)
+green = (0, 255, 0)
+forest = (0,100,0)
 
 # the golden part will be the part we want to avoid burning
 # like protected areas
@@ -17,12 +18,14 @@ gold = (212, 175, 55)
 # simulation stops
 
 
-width = 15  # largura célula
-height = 15  # altura célula
+width = 10  # largura célula
+height = 10  # altura célula
 
 margin = 1  # margem entre cada célula
-n = 40  # número de linhas e colunas
+n = 60  # número de linhas e colunas
 
+
+win_dir = None # pegar direção com setas do teclado
 
 grid = []  # grid inicia com 1s => para área arborizada
 for row in range(n):
@@ -35,7 +38,6 @@ pygame.init()
 min_width = (width+margin)*n
 min_height = (height+margin)*n
 
-print(min_width,min_height)
 
 window_size = [min_width+1, min_height+175]
 screen = pygame.display.set_mode(window_size, pygame.RESIZABLE)
@@ -73,7 +75,6 @@ def paintCell():
         if outsideGrid == False and outsideWindow == False:
             grid[row][col] = clicked
 
-
 while not done:
 
     screen.fill(silver)
@@ -85,22 +86,31 @@ while not done:
 
 
         if event.type == pygame.KEYDOWN:
-
+            # vegetação rasteira
             if event.key == pygame.K_g:
                 clicked = 1
 
+            # fogo
             if event.key == pygame.K_r:
-                clicked = 2
+                clicked = 100
 
-            if event.key == pygame.K_b:
-                clicked = 3
+            # floresta
+            if event.key == pygame.K_f:
+                clicked = 10
 
-            if event.key == pygame.K_w:
-                clicked = 4
+            # aceiro e terra vazia
+            if event.key == pygame.K_a:
+                clicked = 0
 
+            # preto -- área queimada
             if event.key == pygame.K_z:
                 clicked = -1
+
+            # água
+            if event.key == pygame.K_b:
+                clicked = -2
             
+            # zona protegida -- o que queremos proteger
             if event.key == pygame.K_k:
                 clicked = 'x'
 
@@ -110,21 +120,33 @@ while not done:
     for row in range(n):  # desenha a grid
         for col in range(n):
 
-            color = green  # preenche de branco
+            color = green  # preenche de vegetação
 
-            
+            # água
+            if grid[row][col] == -2:
+                color = blue
+
+            # área queimada
             if grid[row][col] == -1:
                 color = black
+            
+            # aceiro ou terra
+            if grid[row][col] == 0:
+                color = brown
+
+            # vegetação
             if grid[row][col] == 1:
                 color = green
-            if grid[row][col] == 2:
+
+            # fogo
+            if grid[row][col] == 100:
                 color = red
-            if grid[row][col] == 3:
-                color = blue
-            if grid[row][col] == 4:
-                color = brown
-            if grid[row][col] == 0:
-                color = white
+
+            # floresta
+            if grid[row][col] == 10:
+                color = forest
+            
+            # zona protegida
             if grid[row][col] == 'x':
                 color = gold
 
