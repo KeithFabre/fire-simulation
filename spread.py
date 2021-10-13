@@ -1,148 +1,109 @@
-
-'''
-    tirar probabilidade
-    ajustar tamanho do terreno com tamanho da grid
-    
-    -ok- representar vegetação
-    -- representar aceiro (terreno queimado após fogo passar)
-    -- representar lagos
-    -- representar madeira
-    -- reduzir valor grid até chegar em 0 que é área queimada
-    -- área branca (terra vazia, o que fazer?)
-
-
-    -- incluir direção do vento
-    -- parar quando chegar na zona dourada (se tiver uma)
-
-    -- usar descida de gradiente pra alguma coisa?
-    
-
-'''
-
 import numpy as np
 import imageio
 import grid
 
-# 0 = clear, 1 = fuel, 2 = fire
+found_protected = False
 
-terrain_size = [100, 100]
+u = True if grid.win_dir == 'up' else False # up
+d = True if grid.win_dir == 'down' else False # down
+l = True if grid.win_dir == 'left' else False # right
+r = True if grid.win_dir == 'right' else False # left
 
-states = []
-states = grid.grid[:]
-
-print('--------COMEÇO--------------')
-print(states)
-
-total_time = 300
-
-states = np.ones((total_time,*terrain_size))
-states[0,terrain_size[0]//2,terrain_size[1]//2] = 2
-
-found_protected = False # ends simulation if it gets to protected area
+if grid.win_dir == 'reset':
+    u,d,l,r == True # sem vento: todas as direções iguais
 
 
-for t in range(1, total_time):
-    states[t] = states[t-1].copy() # assume valor do estado anterior
+for t in range(1,grid.total_time):
+    if not(found_protected):
+        grid.states[t] = grid.states[t-1].copy()
 
-    print(states[2])
+        for i in range(1,grid.terrain_size[0]-1):
+            for j in range(1,grid.terrain_size[1]-1):
+                if grid.states[t-1,i,j] == 100: # it's on fire
+                    grid.states[t,i,j] = -1 # put it out and clear it
 
-    for i in range(1, terrain_size[0]-1): # anda por linhas
-        for j in range(1, terrain_size[1]-1): # anda por colunas
-
-
-            if states[t-1,i,j] == 100: # se no tempo anterior, nesse local havia fogo
-                states[t,i,j] = 0 # apaga o fogo no tempo atual
-            
-
-                # checa se no tempo anterior, ao redor desse local,
-                # havia combustível
-                if states[t-1,i+1,j] == 1:
-                    states[t,i+1,j] = 2
-                if states[t-1,i-1,j] == 1:
-                    states[t,i-1,j] = 2
-                if states[t-1,i,j+1] == 1:
-                    states[t,i,j+1] = 2
-                if states[t-1,i,j-1] == 1:
-                    states[t,i,j-1] = 2
-
-print('--------FIM--------------')
-print(states)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''for t in range(1,total_time):
-    states[t] = states[t-1].copy()
-
-    for x in range(1,terrain_size[0]-1):
-        for y in range(1,terrain_size[1]-1):
-            if states[t-1,x,y] == 2: # it's on fire
-                states[t,x,y] = 0 # put it out and clear it
-
-                # if there's fuel surrounding it: set it on fire
-                if states[t-1,x+1,y] >= 1:
-                    states[t,x+1,y] = 100
-                if states[t-1,x-1,y] >= 1:
-                    states[t,x-1,y] = 100
-                if states[t-1,x,y+1] >= 1:
-                    states[t,x,y+1] = 100
-                if states[t-1,x,y-1] >= 1:
-                    states[t,x,y-1] = 100
+                    # propaga o fogo imediatamente em vegetação rasteira
+                    if (grid.states[t-1,i+1,j] == 1) and not(u):
+                        grid.states[t,i+1,j] = 100
+                    if (grid.states[t-1,i-1,j] == 1) and not(d):
+                        grid.states[t,i-1,j] = 100
+                    if (grid.states[t-1,i,j+1] == 1) and not(l):
+                        grid.states[t,i,j+1] = 100
+                    if (grid.states[t-1,i,j-1] == 1) and not(r):
+                        grid.states[t,i,j-1] = 100
+                    
+                    # florestas demoram mais para queimar
+                    if (grid.states[t-1,i+1,j] == 10) and not(u):
+                        grid.states[t,i+1,j] = grid.states[t-1,i+1,j]/10
+                    if (grid.states[t-1,i-1,j] == 10) and not(d):
+                        grid.states[t,i-1,j] = grid.states[t-1,i-1,j]/10
+                    if (grid.states[t-1,i,j+1] == 10) and not(l):
+                        grid.states[t,i,j+1] = grid.states[t-1,i,j+1]/10
+                    if (grid.states[t-1,i,j-1] == 10) and not(r):
+                        grid.states[t,i,j-1] = grid.states[t-1,i,j-1]/10
+                    
+                    # não é combustível: aceiro/terra e água
+                    # permanece com mesmo valor: não queima
+                    if (grid.states[t-1,i+1,j] <= 0) and not(u):
+                        grid.states[t,i+1,j] = grid.states[t-1,i+1,j]
+                    if (grid.states[t-1,i-1,j] <= 0) and not(d):
+                        grid.states[t,i-1,j] = grid.states[t-1,i-1,j]
+                    if (grid.states[t-1,i,j+1] <= 0) and not(l):
+                        grid.states[t,i,j+1] = grid.states[t-1,i,j+1]
+                    if (grid.states[t-1,i,j-1] <= 0) and not(r):
+                        grid.states[t,i,j-1] = grid.states[t-1,i,j-1]
+                    
+                    # área protegida: meta é evitá-la
+                    # se chegar nela, a simulação finaliza
+                    if (grid.states[t-1,i+1,j] == 2651) and not(u):
+                        grid.states[t,i+1,j] = 100
+                        found_protected = True
+                    if (grid.states[t-1,i-1,j] == 2651) and not(d):
+                        grid.states[t,i-1,j] = 100
+                        found_protected = True
+                    if (grid.states[t-1,i,j+1] == 2651) and not(l):
+                        grid.states[t,i,j+1] = 100
+                        found_protected = True
+                    if (grid.states[t-1,i,j-1] == 2651) and not(r):
+                        grid.states[t,i,j-1] = 100
+                        found_protected = True
+                    
                 
-                # fazer lógica pra diminuir até chegar em 0
-                # e assim passar pra próxima
-
-                # if it gets to protected area: stop simulation
-            
+                if grid.states[t-1,i,j] == -2: # água -> permanece
+                    grid.states[t,i,j] = -2
+                    
+                if grid.states[t-1,i,j] == 0: # terra/aceiro -> permanece
+                    grid.states[t,i,j] = 0
                 
 
+#print(grid.states)
 
 
 
-
-
-
-
-
-
-
-
-colored = np.zeros((grid.n, grid.n,3),dtype=np.uint8)
+colored = np.zeros((grid.total_time,*grid.terrain_size,3),dtype=np.uint8)
 
 # Color
-for t in range(states.shape[0]):
-    for x in range(states[t].shape[0]):
-        for y in range(states[t].shape[1]):
-            value = states[t,x,y].copy()
+for t in range(grid.states.shape[0]):
+    for i in range(grid.states[t].shape[0]):
+        for j in range(grid.states[t].shape[1]):
+            value = grid.states[t,i,j].copy()
 
-            if value == 0:
-                colored[t,x,y] = [139,69,19] # clear
+            if value == -2:
+                colored[t,i,j] = grid.blue # água
+            elif value == -1:
+                colored[t,i,j] = grid.black # queimada
+            elif value == 0:
+                colored[t,i,j] = grid.brown # terra/aceiro
             elif value == 1:
-                colored[t,x,y] = [0,255,0] # fuel
-            elif value == 2:
-                colored[t,x,y] = [255,0,0] # burning
+                colored[t,i,j] = grid.green # vegetação rasteira
+            elif value == 10:
+                colored[t,i,j] = grid.forest # vegetação
+            elif value == 100:
+                colored[t,i,j] = grid.red # fogo
+            elif value == 2651:
+                colored[t,i,j] = grid.gold # área protegida
 
 # Crop
-cropped = colored[:200, 1:terrain_size[0]-1,1:terrain_size[1]-1]
+cropped = colored[:200, 1:grid.terrain_size[0]-1,1:grid.terrain_size[1]-1]
 
-imageio.mimsave('./video.gif', cropped)'''
+imageio.mimsave('./video.gif', cropped)

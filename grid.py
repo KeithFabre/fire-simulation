@@ -15,41 +15,22 @@ green = (0, 255, 0)
 forest = (3, 124, 80)
 
 
+
 width = 16  # largura célula
 height = 16  # altura célula
 
 margin = 1  # margem entre cada célula
-n = 40 # número de linhas e colunas
+n = 50 # número de linhas e colunas
 
-win_dir = None # pegar direção com setas do teclado
+win_dir = 'reset' # pegar direção com setas do teclado
 
 
-terrain_size = [n, n]
+terrain_size = [n,n]
 
 total_time = 100
 states = np.ones((total_time,*terrain_size))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pygame.init()
-
 
 min_width = (width+margin)*n
 min_height = (height+margin)*n
@@ -72,20 +53,6 @@ new_color = green  # cor para a célula
 clicked = 1  # valor para célula
 
 clock = pygame.time.Clock()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def paintCell():
@@ -140,7 +107,7 @@ while not done:
             
             # zona protegida -- o que queremos proteger
             if event.key == pygame.K_k:
-                clicked = 'x'
+                clicked = 2651
         
             # para direção do vento
             if event.key == pygame.K_RIGHT:
@@ -190,7 +157,7 @@ while not done:
                 color = forest
             
             # zona protegida
-            if states[0][row][col] == 'x':
+            if states[0][row][col] == 2651:
                 color = gold
 
             pygame.draw.rect(screen,
@@ -211,45 +178,5 @@ while not done:
 
 pygame.quit()
 
-print(states)
+#print(states)
 
-for t in range(1,total_time):
-    states[t] = states[t-1].copy()
-
-    for x in range(1,terrain_size[0]-1):
-        for y in range(1,terrain_size[1]-1):
-            if states[t-1,x,y] == 100: # it's on fire
-                states[t,x,y] = 0 # put it out and clear it
-
-                # if there's fuel surrounding it: set it on fire
-                if states[t-1,x+1,y] == 1:
-                    states[t,x+1,y] = 100
-                if states[t-1,x-1,y] == 1:
-                    states[t,x-1,y] = 100
-                if states[t-1,x,y+1] == 1:
-                    states[t,x,y+1] = 100
-                if states[t-1,x,y-1] == 1:
-                    states[t,x,y-1] = 100
-
-print(states)
-
-
-colored = np.zeros((total_time,*terrain_size,3),dtype=np.uint8)
-
-# Color
-for t in range(states.shape[0]):
-    for x in range(states[t].shape[0]):
-        for y in range(states[t].shape[1]):
-            value = states[t,x,y].copy()
-
-            if value == 0:
-                colored[t,x,y] = [139,69,19] # clear
-            elif value == 1:
-                colored[t,x,y] = [0,255,0] # fuel
-            elif value == 100:
-                colored[t,x,y] = [255,0,0] # burning
-
-# Crop
-cropped = colored[:200, 1:terrain_size[0]-1,1:terrain_size[1]-1]
-
-imageio.mimsave('./video.gif', cropped)
