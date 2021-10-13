@@ -1,6 +1,4 @@
 import pygame
-import numpy as np
-import imageio
 from Button import button
 
 # cores
@@ -19,40 +17,22 @@ width = 16  # largura célula
 height = 16  # altura célula
 
 margin = 1  # margem entre cada célula
-n = 40 # número de linhas e colunas
+n = 50 # número de linhas e colunas
 
 win_dir = None # pegar direção com setas do teclado
 
-
-terrain_size = [n, n]
-
-total_time = 100
-states = np.ones((total_time,*terrain_size))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+grid = []  # grid inicia com 1s => para vegetação rasteira
+for row in range(n):
+    grid.append([])
+    for col in range(n):
+        grid[row].append(1)
 
 pygame.init()
 
-
 min_width = (width+margin)*n
 min_height = (height+margin)*n
+
+
 window_size = [min_width+1, min_height+175]
 screen = pygame.display.set_mode(window_size, pygame.RESIZABLE)
 
@@ -74,20 +54,6 @@ clicked = 1  # valor para célula
 clock = pygame.time.Clock()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def paintCell():
     click = pygame.mouse.get_pressed()
     pos = pygame.mouse.get_pos()
@@ -101,7 +67,7 @@ def paintCell():
 
     if click[0] == True:
         if outsideGrid == False and outsideWindow == False:
-            states[0][row][col] = clicked
+            grid[row][col] = clicked
 
 while not done:
 
@@ -166,31 +132,31 @@ while not done:
             color = green  # preenche de vegetação
 
             # água
-            if states[0][row][col] == -2:
+            if grid[row][col] == -2:
                 color = blue
 
             # área queimada
-            if states[0][row][col] == -1:
+            if grid[row][col] == -1:
                 color = black
             
             # aceiro ou terra
-            if states[0][row][col] == 0:
+            if grid[row][col] == 0:
                 color = brown
 
             # vegetação
-            if states[0][row][col] == 1:
+            if grid[row][col] == 1:
                 color = green
 
             # fogo
-            if states[0][row][col] == 100:
+            if grid[row][col] == 100:
                 color = red
 
             # floresta
-            if states[0][row][col] == 10:
+            if grid[row][col] == 10:
                 color = forest
             
             # zona protegida
-            if states[0][row][col] == 'x':
+            if grid[row][col] == 'x':
                 color = gold
 
             pygame.draw.rect(screen,
@@ -211,45 +177,3 @@ while not done:
 
 pygame.quit()
 
-print(states)
-
-for t in range(1,total_time):
-    states[t] = states[t-1].copy()
-
-    for x in range(1,terrain_size[0]-1):
-        for y in range(1,terrain_size[1]-1):
-            if states[t-1,x,y] == 100: # it's on fire
-                states[t,x,y] = 0 # put it out and clear it
-
-                # if there's fuel surrounding it: set it on fire
-                if states[t-1,x+1,y] == 1:
-                    states[t,x+1,y] = 100
-                if states[t-1,x-1,y] == 1:
-                    states[t,x-1,y] = 100
-                if states[t-1,x,y+1] == 1:
-                    states[t,x,y+1] = 100
-                if states[t-1,x,y-1] == 1:
-                    states[t,x,y-1] = 100
-
-print(states)
-
-
-colored = np.zeros((total_time,*terrain_size,3),dtype=np.uint8)
-
-# Color
-for t in range(states.shape[0]):
-    for x in range(states[t].shape[0]):
-        for y in range(states[t].shape[1]):
-            value = states[t,x,y].copy()
-
-            if value == 0:
-                colored[t,x,y] = [139,69,19] # clear
-            elif value == 1:
-                colored[t,x,y] = [0,255,0] # fuel
-            elif value == 100:
-                colored[t,x,y] = [255,0,0] # burning
-
-# Crop
-cropped = colored[:200, 1:terrain_size[0]-1,1:terrain_size[1]-1]
-
-imageio.mimsave('./video.gif', cropped)

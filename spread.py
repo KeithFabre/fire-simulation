@@ -1,8 +1,3 @@
-import numpy as np
-import imageio
-
-# 0 = clear, 1 = fuel, 2 = fire
-
 
 '''
     tirar probabilidade
@@ -18,22 +13,85 @@ import imageio
 
     -- incluir direção do vento
     -- parar quando chegar na zona dourada (se tiver uma)
+
+    -- usar descida de gradiente pra alguma coisa?
     
 
 '''
 
+import numpy as np
+import imageio
+import grid
 
+# 0 = clear, 1 = fuel, 2 = fire
 
-prob = .6
+terrain_size = [100, 100]
+
+states = []
+states = grid.grid[:]
+
+print('--------COMEÇO--------------')
+print(states)
+
 total_time = 300
-terrain_size = [100,100]
 
-states = np.zeros((total_time,*terrain_size))
-states[0] = np.random.choice([0,1],size=terrain_size,p=[1-prob,prob])
-# set middle cell on fire
+states = np.ones((total_time,*terrain_size))
 states[0,terrain_size[0]//2,terrain_size[1]//2] = 2
 
-for t in range(1,total_time):
+found_protected = False # ends simulation if it gets to protected area
+
+
+for t in range(1, total_time):
+    states[t] = states[t-1].copy() # assume valor do estado anterior
+
+    print(states[2])
+
+    for i in range(1, terrain_size[0]-1): # anda por linhas
+        for j in range(1, terrain_size[1]-1): # anda por colunas
+
+
+            if states[t-1,i,j] == 100: # se no tempo anterior, nesse local havia fogo
+                states[t,i,j] = 0 # apaga o fogo no tempo atual
+            
+
+                # checa se no tempo anterior, ao redor desse local,
+                # havia combustível
+                if states[t-1,i+1,j] == 1:
+                    states[t,i+1,j] = 2
+                if states[t-1,i-1,j] == 1:
+                    states[t,i-1,j] = 2
+                if states[t-1,i,j+1] == 1:
+                    states[t,i,j+1] = 2
+                if states[t-1,i,j-1] == 1:
+                    states[t,i,j-1] = 2
+
+print('--------FIM--------------')
+print(states)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''for t in range(1,total_time):
     states[t] = states[t-1].copy()
 
     for x in range(1,terrain_size[0]-1):
@@ -42,16 +100,34 @@ for t in range(1,total_time):
                 states[t,x,y] = 0 # put it out and clear it
 
                 # if there's fuel surrounding it: set it on fire
-                if states[t-1,x+1,y] == 1:
-                    states[t,x+1,y] = 2
-                if states[t-1,x-1,y] == 1:
-                    states[t,x-1,y] = 2
-                if states[t-1,x,y+1] == 1:
-                    states[t,x,y+1] = 2
-                if states[t-1,x,y-1] == 1:
-                    states[t,x,y-1] = 2
+                if states[t-1,x+1,y] >= 1:
+                    states[t,x+1,y] = 100
+                if states[t-1,x-1,y] >= 1:
+                    states[t,x-1,y] = 100
+                if states[t-1,x,y+1] >= 1:
+                    states[t,x,y+1] = 100
+                if states[t-1,x,y-1] >= 1:
+                    states[t,x,y-1] = 100
+                
+                # fazer lógica pra diminuir até chegar em 0
+                # e assim passar pra próxima
 
-colored = np.zeros((total_time,*terrain_size,3),dtype=np.uint8)
+                # if it gets to protected area: stop simulation
+            
+                
+
+
+
+
+
+
+
+
+
+
+
+
+colored = np.zeros((grid.n, grid.n,3),dtype=np.uint8)
 
 # Color
 for t in range(states.shape[0]):
@@ -69,4 +145,4 @@ for t in range(states.shape[0]):
 # Crop
 cropped = colored[:200, 1:terrain_size[0]-1,1:terrain_size[1]-1]
 
-imageio.mimsave('./video.gif', cropped)
+imageio.mimsave('./video.gif', cropped)'''
