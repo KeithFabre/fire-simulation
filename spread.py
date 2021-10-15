@@ -76,11 +76,8 @@ for t in range(1,grid.total_time):
                     grid.states[t,i,j] = 0
                 
 
-#print(grid.states)
 
-
-
-colored = np.zeros((grid.total_time,*grid.terrain_size,3),dtype=np.uint8)
+colored = np.zeros((grid.total_time,*grid.terrain_size,3),dtype=np.uint8)git 
 
 # Color
 for t in range(grid.states.shape[0]):

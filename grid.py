@@ -1,6 +1,5 @@
 import pygame
 import numpy as np
-import imageio
 from Button import button
 
 # cores
@@ -13,7 +12,6 @@ blue = (0, 0, 255)
 red = (255, 0, 0)
 green = (0, 255, 0)
 forest = (3, 124, 80)
-
 
 
 width = 16  # largura célula
@@ -37,7 +35,7 @@ min_height = (height+margin)*n
 window_size = [min_width+1, min_height+175]
 screen = pygame.display.set_mode(window_size, pygame.RESIZABLE)
 
-pygame.display.set_caption("Grid 2D")
+pygame.display.set_caption("Cenário Ambiental Inicial")
 
 
 # load button image
